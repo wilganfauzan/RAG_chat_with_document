@@ -1,0 +1,73 @@
+# Byte-compiled / optimized / Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+.env/
+env/
+.venv/
+
+# Environment variables and secrets
+*.env
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+static/
+staticfiles/
+local_settings.py
+
+# Editor settings
+.vscode/
+.idea/
+
+# macOS / Windows system files
+.DS_Store
+Thumbs.db
+
+# Testing and coverage reports
+htmlcov/
+.tox/
+.nox/
+.cache/
+.pytest_cache/
+.coverage
+
+# Type checker and formatter caches
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# Packaging build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Redis (RDB dump file, if generated)
+dump.rdb
+
+# ChromaDB vector storage
+chroma/
+db/
+
+# LangChain or vector DB cache (optional, based on config)
+*.lance/
+index/
+
+# Black & isort caches
+.cache/
+.mypy_cache
+.pytest_cache
+
+# Sometimes need it
+*_Zone.Identifier

@@ -1,0 +1,12 @@
+Django>=4.2,<5.0
+python-dotenv
+openai
+redis
+channels
+channels-redis
+mistralai
+langchain_experimental
+langchain_openai
+isort
+black
+bson
