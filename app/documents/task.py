@@ -3,6 +3,10 @@ from huey.contrib.djhuey import task
 from documents.models import Document, DOC_STATUS_COMPLETE
 from core.ai.mistralai import mistral
 from core.ai.prompt_manager import PromptManager
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain.embeddings.openai import OpenAIEmbeddings
+from core.ai.chromadb import chroma, openai_ef
+import json
 
 @task()
 def process_document(document: Document):
@@ -40,3 +44,12 @@ def process_document(document: Document):
     document.summary = summarized_content
     document.status = DOC_STATUS_COMPLETE
     document.save()
+
+    splitter = SemanticChunker(OpenAIEmbeddings())
+    documents = splitter.create_documents([content])
+
+    collection = chroma.create_collection(name=str(document.id), embedding_function=openai_ef)
+    collection.add(
+        documents=[doc.model_dump().get("page_content") for doc in documents],
+        ids=[str(i) for i in range(len(documents))]
+    )

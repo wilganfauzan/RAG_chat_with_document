@@ -5,6 +5,8 @@ from core.ai.mistralai import mistral
 from .models import Document
 from .task import process_document
 
+from core.ai.chromadb import chroma, openai_ef
+
 
 class DocumentUploadView(View):
     def get(self, request):
@@ -25,3 +27,17 @@ class DocumentUploadView(View):
             print(e)
 
         return redirect("documents")
+
+class QueryView(View):
+    def get(self, request):
+        return render(request, "documents/query.html")
+
+    def post(self, request):
+        query = request.POST.get("query")
+
+        collection = chroma.get_or_create_collection(name="6810ee5905ad88e6897ff7fe", embedding_function=openai_ef)
+        data = collection.query(
+            query_texts=[query],
+            n_results=3
+        )
+        print(data)

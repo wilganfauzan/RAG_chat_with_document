@@ -11,3 +11,4 @@ isort
 black
 bson
 huey
+chromadb
