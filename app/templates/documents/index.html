@@ -7,4 +7,30 @@
     <button type="submit">Upload</button>
 </form>
 
+<div id="notification"></div>
+
+<script>
+    const ws = new WebSocket("ws://localhost:8000/ws/notification/");
+
+    ws.onmessage = (event) => {
+       const data = JSON.parse(event.data);
+
+       const type = data.message.type;
+       const content = data.message.content;
+
+       if (type == "notification") {
+           const notifContainer = document.getElementById("notification");
+           notifContainer.innerHTML = content;
+       }
+    };
+
+    ws.onopen = () => {
+     console.log("Connected");
+    }:
+
+    ws.onclose = () => {
+     console.log("Disconnected");
+    };
+</script>
+
 {% endblock %}

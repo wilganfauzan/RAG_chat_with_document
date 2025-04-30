@@ -35,7 +35,7 @@ class QueryView(View):
     def post(self, request):
         query = request.POST.get("query")
 
-        collection = chroma.get_or_create_collection(name="6810ee5905ad88e6897ff7fe", embedding_function=openai_ef)
+        collection = chroma.get_or_create_collection(name="6811902f18c29f5aa8efb3b3", embedding_function=openai_ef)
         data = collection.query(
             query_texts=[query],
             n_results=3

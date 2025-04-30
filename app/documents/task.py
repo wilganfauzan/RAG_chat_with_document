@@ -1,5 +1,6 @@
 from huey.contrib.djhuey import task
 
+from core.methods import send_notification
 from documents.models import Document, DOC_STATUS_COMPLETE
 from core.ai.mistralai import mistral
 from core.ai.prompt_manager import PromptManager
@@ -10,6 +11,7 @@ import json
 
 @task()
 def process_document(document: Document):
+    send_notification("notification", "Processing document")
     uploaded_pdf = mistral.files.upload(
         file={
             "file_name": document.name,
@@ -34,6 +36,7 @@ def process_document(document: Document):
     for page in ocr_result.dict().get("pages", []):
         content += page["markdown"]
 
+    send_notification("notification", "Summarizing document")
     pm = PromptManager(model="gpt-4.1")
     pm.add_message("system", "Please summarize the provided text. Extract also the key points")
     pm.add_message("user", f"Content : {content}")
@@ -45,6 +48,8 @@ def process_document(document: Document):
     document.status = DOC_STATUS_COMPLETE
     document.save()
 
+    send_notification("notification", "Indexing document")
+
     splitter = SemanticChunker(OpenAIEmbeddings())
     documents = splitter.create_documents([content])
 
@@ -53,3 +58,5 @@ def process_document(document: Document):
         documents=[doc.model_dump().get("page_content") for doc in documents],
         ids=[str(i) for i in range(len(documents))]
     )
+
+    send_notification("done", "Document indexed")
