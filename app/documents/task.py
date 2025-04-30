@@ -1,62 +1,11 @@
 from huey.contrib.djhuey import task
 
-from core.methods import send_notification
-from documents.models import Document, DOC_STATUS_COMPLETE
-from core.ai.mistralai import mistral
-from core.ai.prompt_manager import PromptManager
-from langchain_experimental.text_splitter import SemanticChunker
-from langchain.embeddings.openai import OpenAIEmbeddings
-from core.ai.chromadb import chroma, openai_ef
-import json
+from documents.methods import process_ocr, process_vector, summarize_document
+from documents.models import Document
+
 
 @task()
 def process_document(document: Document):
-    send_notification("notification", "Processing document")
-    uploaded_pdf = mistral.files.upload(
-        file={
-            "file_name": document.name,
-            "content": open(f"media/{document.file.name}", "rb")
-
-        },
-        purpose="ocr"
-    )  # private
-
-    signed_url = mistral.files.get_signed_url(file_id=uploaded_pdf.id)
-
-    ocr_result = mistral.ocr.process(
-        model="mistral-ocr-latest",
-        document={
-            "type": "document_url",
-            "document_url": signed_url.url
-        }
-    )
-
-    content = ""
-
-    for page in ocr_result.dict().get("pages", []):
-        content += page["markdown"]
-
-    send_notification("notification", "Summarizing document")
-    pm = PromptManager(model="gpt-4.1")
-    pm.add_message("system", "Please summarize the provided text. Extract also the key points")
-    pm.add_message("user", f"Content : {content}")
-
-    summarized_content = pm.generate()
-
-    document.raw_text = content
-    document.summary = summarized_content
-    document.status = DOC_STATUS_COMPLETE
-    document.save()
-
-    send_notification("notification", "Indexing document")
-
-    splitter = SemanticChunker(OpenAIEmbeddings())
-    documents = splitter.create_documents([content])
-
-    collection = chroma.create_collection(name=str(document.id), embedding_function=openai_ef)
-    collection.add(
-        documents=[doc.model_dump().get("page_content") for doc in documents],
-        ids=[str(i) for i in range(len(documents))]
-    )
-
-    send_notification("done", "Document indexed")
+    ocr_content = process_ocr(document)
+    summarize_document(document, ocr_content)
+    process_vector(document, ocr_content)
