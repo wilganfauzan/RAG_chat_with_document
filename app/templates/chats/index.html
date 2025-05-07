@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <textarea type="text"></textarea>
+    <button type="submit">Send</button>
+
+<div id="chats"></div>
+
+<script>
+    const ws = new WebSocket("ws://localhost:8000/ws/chat/{{ document_id }}/");
+
+    ws.onmessage = (event) => {
+       const data = JSON.parse(event.data);
+
+       const type = data.message.type;
+       const content = data.message.content;
+
+       if (type == "notification") {
+           const notifContainer = document.getElementById("notification");
+           notifContainer.innerHTML = content;
+       }
+    };
+
+    ws.onopen = () => {
+     console.log("Connected");
+    };
+
+    ws.onclose = () => {
+     console.log("Disconnected");
+    };
+</script>
+
+{% endblock %}
