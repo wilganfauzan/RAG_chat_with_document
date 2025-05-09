@@ -2,6 +2,8 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from chats.tasks import process_chat
+
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -30,7 +32,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"] ##Message received from client or frontend
 
-        print(f"Message received: {message}")
+        process_chat(message, self.document_id)
 
     async def send_message(self, event):
         message = event["message"]

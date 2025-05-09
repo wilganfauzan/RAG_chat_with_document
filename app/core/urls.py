@@ -8,6 +8,7 @@ from .consumer import NotificationConsumer, ChatConsumer
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("documents.urls")),
+    path("", include("chats.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 websocket_urlpatterns = [

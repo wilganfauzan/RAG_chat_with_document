@@ -1,24 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <textarea type="text"></textarea>
-    <button type="submit">Send</button>
+    <textarea id="chat-message" type="text"></textarea>
+    <button id="submit">Send</button>
 
 <div id="chats"></div>
 
 <script>
     const ws = new WebSocket("ws://localhost:8000/ws/chat/{{ document_id }}/");
+    const chatContainer = document.getElementById("chats");
+
+    const submitBtn = document.getElementById("submit")
+    submitBtn.onclick = () => {
+        const message = document.getElementById("chat-message")
+        const inputValue = message.value
+
+        const userMessage = document.createElement("p");
+        message.innerText = inputValue
+        chatContainer.appendChild(userMessage);
+
+        ws.send(JSON.stringify({'message': inputValue,
+        }))
+
+        message.value = ""
+
+        }
 
     ws.onmessage = (event) => {
        const data = JSON.parse(event.data);
 
-       const type = data.message.type;
-       const content = data.message.content;
-
-       if (type == "notification") {
-           const notifContainer = document.getElementById("notification");
-           notifContainer.innerHTML = content;
-       }
+       const message = document.createElement("p");
+       message.innerText = data.message;
+       chatContainer.appendChild(message);
     };
 
     ws.onopen = () => {
